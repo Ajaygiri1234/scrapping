@@ -3,37 +3,43 @@ import requests
 import re
 
 final_result = {}
+#aa={"next_iter":1}
 
 
-def find_article(query):
+
+def find_article(query,next_iteration):
     # query="जीतपु"
     each_result = []
-    for page in range(1, 30):
+    for page in range(next_iteration, 4):
         if len(each_result) <= 30:
-
+            print(page,"="*50)
             url = "https://bg.annapurnapost.com/api/search?title=" + query + "&page=" + str(page)
-            response = requests.get(url)
+            try:
+                response = requests.get(url)
+            except Exception as e:
+                print(page, "=" * 50)
+                json_for_next_run["next_iter"]=page+1
+                with open("next_file.json", "w") as f:
+                    json.dump(json_for_next_run, f)
+                    response = requests.get(url)##to return the error and terminate program
+                #print(page, "hello")
+                #print(id(e))
+                #print(type(e.args))
+                #print(e.args[0])
+                #continue
             status_code = response.status_code
             if status_code == 200:
-
                 response = response.json()
-                print(response["status"], len(response["data"]["items"]))
-                print(type(response["status"]), type(len(response["data"]["items"])))
-
-                print(response["status"] == "success", len(response["data"]["items"]) == 0)
+                #print(response["status"], len(response["data"]["items"]))
+                #print(type(response["status"]), type(len(response["data"]["items"])))
+                #print(response["status"] == "success", len(response["data"]["items"]) == 0)
                 if (response["status"] == "success") & (len(response["data"]["items"]) == 0):
                     break
-
-                # print(a.keys())
-                # print(a["data"])
                 response = response["data"]["items"]
-
-                # json.dumps(a,indent = 3,ensure_ascii=False)
-
                 unwanted_keys = ['province', 'introText', 'newsHighlights', 'status', 'categories', 'caption',
                                  'videoLink', 'isFeatured', 'isBreakingNews', 'isImportantNews']
                 for index, item in enumerate(response):
-                    for i in remove_keys:
+                    for i in unwanted_keys:
                         del response[index][i]
 
                 for count, i in enumerate(response):
@@ -54,14 +60,23 @@ def find_article(query):
 
 
 # list_of_items=["जीत",'शेरबहादुर','दर्ता']
-list_of_items = ["जीत", 'शेरबहादुर', 'दर्ता', "मोरङ", "हत्या", "मृत्यु", "महिला"]
-for itemm in list_of_items:
-    find_article(itemm)
+#list_of_items = ["जीत", 'शेरबहादुर', 'दर्ता', "मोरङ", "हत्या", "मृत्यु", "महिला"]
 
-# print(final_result)
+try:
+    with open("next_file.json","r") as f:
+        json_for_next_run=json.load(f)
+except:
+    json_for_next_run={"next_iter":1}
+
+
+search_item="जीत"
+find_article(search_item,json_for_next_run["next_iter"])
+
+
 
 
 print(type(final_result))
 output = json.dumps(final_result, indent=3, ensure_ascii=False)
+
 print(type(output))
 print(output)
