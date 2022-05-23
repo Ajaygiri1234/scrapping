@@ -12,7 +12,7 @@ list_of_items=["i am reading book"]
 from selenium.webdriver import Chrome,Edge,EdgeOptions
 
 options=EdgeOptions()
-options.headless=False
+options.headless=True
 driver= Edge("C:\\Users\\User\\Downloads\\edgedriver_win64\\msedgedriver.exe",options=options)
 
 result = {}
